@@ -21,7 +21,20 @@ contract LendingPool {
 
     mapping(address => LiquidityProvider) providers;
 
-    // structs
+    // structs and Enums
+    enum LoanStatus {
+        ACTIVE,
+        REPAID,
+        DEFAULTED
+    }
+    struct Loan {
+        uint256 amount;
+        address borrower;
+        uint256 collateral;
+        uint256 interestRate;
+        uint256 loanDuration;
+        LoanStatus loanStatus;
+    }
     struct LiquidityProvider {
         uint256 amount;
         address provider;
@@ -30,10 +43,12 @@ contract LendingPool {
     // Constructor, Functions and Modifiers
     constructor(
         IERC20 _token,
-        address _creator
+        address _creator,
+        uint256 _initialIP
     ) {
         token = _token;
         creator = _creator;
+        interestRate = _initialIP;
     }
 
     modifier onlyLP {
@@ -41,7 +56,20 @@ contract LendingPool {
         _;
     }
 
-    function depositFunds(uint256 _amount) public {
+    function getLP() public view returns(LiquidityProvider memory lp) {
+        lp = providers[msg.sender];
+        return lp;
+    }
+
+    function getPoolBalance() public view returns(uint256) {
+        return liquidity;
+    }
+
+    function getTotalSupplied() public view returns(uint256){
+        return totalSupplied;
+    }
+
+    function supplyFunds(uint256 _amount) public {
         LiquidityProvider memory lp = providers[msg.sender]; 
 
         if (msg.sender == lp.provider) { 
@@ -71,6 +99,21 @@ contract LendingPool {
 
         liquidity -= _amount;
         token.safeTransfer(msg.sender, _amount);
+    }
+
+    function borrow(uint256 _amount, uint256 _collateral) public {
+
+    }
+
+    function payLoan() public {
+
+    }
+
+    // Calulate the interest rate when needed
+    // this function is only called by other
+    // functions in this contract
+    function calculateInterestRate() internal {
+
     }
 
 }
