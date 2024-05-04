@@ -12,7 +12,7 @@ contract LendingPool {
 
     // Storage
     uint256 public liquidity;
-    uint256 public interestRate;
+    uint256 public fixedInterestRate;
     uint256 public totalSupplied;
     uint256 public totalBorrowed;
 
@@ -101,8 +101,20 @@ contract LendingPool {
         token.safeTransfer(msg.sender, _amount);
     }
 
-    function borrow(uint256 _amount, uint256 _collateral) public {
+    function borrow(uint256 _amount, uint256 _collateral, uint256 _duration) public {
+        require(_amount == _collateral, "Invalid Collateral");
+        Loan memory newLoad = Loan({
+            amount: _amount,
+            borrower: msg.sender,
+            collateral: _collateral,
+            interestRate: calculateInterestRate(_amount, _duaration),
+            loanDuration: _duaration,
+            loanStatus: LoanStatus.ACTIVE
+        });
 
+        liquidity -= _amount;
+        totalBorrowed += _amount;
+        token.safeTransfer(msg.sender, _amount);
     }
 
     function payLoan() public {
@@ -112,8 +124,8 @@ contract LendingPool {
     // Calulate the interest rate when needed
     // this function is only called by other
     // functions in this contract
-    function calculateInterestRate() internal {
-
+    function calculateInterestRate(uint256 _amount, uint256 _loanDuration) internal {
+        return (_amount * fixedInterestRate * _loanDuration) / 365;
     }
 
 }
